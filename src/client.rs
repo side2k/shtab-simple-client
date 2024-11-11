@@ -1,4 +1,4 @@
-use crate::user_profile::UserProfile;
+use crate::user_profile::{AuthCredentials, AuthResponse, UserProfile};
 use reqwest::header::HeaderMap;
 use reqwest::{Client as HTTPClient, RequestBuilder, Response, StatusCode};
 use serde::ser::Serialize;
@@ -74,6 +74,19 @@ impl Client {
         match self.get("/en/api/users/profile/", None).await {
             Ok(response) => Ok(response.json().await.unwrap()),
             Err(error) => Err(error),
+        }
+    }
+
+    pub async fn login(&self, username: String, password: String) -> Result<AuthResponse, String> {
+        let credentials = AuthCredentials { username, password };
+        print!("{:?}", credentials);
+        let response = self
+            .post("/en/api/users/user/login/", credentials)
+            .await
+            .unwrap();
+        match response.status() {
+            StatusCode::OK => Ok(response.json().await.unwrap()),
+            _ => Err(format!("Got status code {}", response.status())),
         }
     }
 }
