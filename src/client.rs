@@ -9,12 +9,14 @@ pub struct Client {
 type Query = Vec<(String, String)>;
 
 impl Client {
-    pub fn new(api_token: String) -> Self {
+    pub fn new(api_token: Option<String>) -> Self {
         let mut default_headers = HeaderMap::new();
-        default_headers.insert(
-            "Authorization",
-            format!("Token {}", api_token).parse().unwrap(),
-        );
+        if let Some(api_token) = api_token {
+            default_headers.insert(
+                "Authorization",
+                format!("Token {}", api_token).parse().unwrap(),
+            );
+        }
 
         let client = reqwest::ClientBuilder::new()
             .default_headers(default_headers)
