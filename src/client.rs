@@ -1,4 +1,6 @@
+use crate::activity::{ActivityAddWorkTime, ActivityWorkTime};
 use crate::user_profile::{AuthCredentials, AuthResponse, UserProfile};
+use chrono::{DateTime, Local};
 use reqwest::header::HeaderMap;
 use reqwest::{Client as HTTPClient, RequestBuilder, Response, StatusCode};
 use serde::ser::Serialize;
@@ -87,6 +89,27 @@ impl Client {
         match response.status() {
             StatusCode::OK => Ok(response.json().await.unwrap()),
             _ => Err(format!("Got status code {}", response.status())),
+        }
+    }
+
+    pub async fn activity_work_time(
+        &self,
+        activity_id: i64,
+        user_id: i64,
+        task_id: i64,
+        from: DateTime<Local>,
+        to: DateTime<Local>,
+    ) -> Result<ActivityWorkTime, String> {
+        let data = ActivityAddWorkTime::for_adding(user_id, task_id, from, to);
+        let url = format!("/api/reports/activity/{}/work-time/", activity_id);
+        let response = self.post(&url, data).await.unwrap();
+        match response.status() {
+            StatusCode::OK => Ok(response.json().await.unwrap()),
+            _ => Err(format!(
+                "Got status code {}: {:?}",
+                response.status(),
+                response.text().await.unwrap()
+            )),
         }
     }
 }
