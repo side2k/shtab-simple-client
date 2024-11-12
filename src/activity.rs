@@ -60,3 +60,22 @@ pub struct ActivityWorkTimeEntry {
 }
 
 pub type ActivityWorkTime = Vec<ActivityWorkTimeEntry>;
+
+pub type FromToTuple = Vec<DateTime<Local>>;
+
+#[derive(Serialize, Debug)]
+pub struct ActivityDeleteWorkTime {
+    user: i64,
+    only_delete: bool,
+    date_from_date_to: Vec<FromToTuple>,
+}
+
+impl ActivityDeleteWorkTime {
+    pub fn for_single(user_id: i64, from: DateTime<Local>, to: DateTime<Local>) -> Self {
+        Self {
+            user: user_id,
+            only_delete: true,
+            date_from_date_to: vec![vec![from, to]],
+        }
+    }
+}

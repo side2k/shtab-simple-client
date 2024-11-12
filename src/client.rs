@@ -1,4 +1,4 @@
-use crate::activity::{ActivityAddWorkTime, ActivityWorkTime};
+use crate::activity::{ActivityAddWorkTime, ActivityDeleteWorkTime, ActivityWorkTime};
 use crate::user_profile::{AuthCredentials, AuthResponse, UserProfile};
 use chrono::{DateTime, Local};
 use reqwest::header::HeaderMap;
@@ -105,6 +105,25 @@ impl Client {
         let response = self.post(&url, data).await.unwrap();
         match response.status() {
             StatusCode::OK => Ok(response.json().await.unwrap()),
+            _ => Err(format!(
+                "Got status code {}: {:?}",
+                response.status(),
+                response.text().await.unwrap()
+            )),
+        }
+    }
+    pub async fn activity_delete_work_time(
+        &self,
+        activity_id: i64,
+        user_id: i64,
+        from: DateTime<Local>,
+        to: DateTime<Local>,
+    ) -> Result<(), String> {
+        let data = ActivityDeleteWorkTime::for_single(user_id, from, to);
+        let url = format!("/api/reports/activity/{}/work-time/", activity_id);
+        let response = self.post(&url, data).await.unwrap();
+        match response.status() {
+            StatusCode::OK => Ok(()),
             _ => Err(format!(
                 "Got status code {}: {:?}",
                 response.status(),
